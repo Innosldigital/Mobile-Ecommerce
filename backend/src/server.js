@@ -10,7 +10,7 @@ app.get("/api/health", (req, res) => {
   res.status(200).json({ message: "Success" });
 });
 
-//Make our app ready for production deployment
+//Make our app ready for production deployment purposes
 if (ENV.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../admin/dist")));
 
