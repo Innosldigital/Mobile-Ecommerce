@@ -3,25 +3,29 @@ import path from "path";
 
 const storage = multer.diskStorage({
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}${path.extname(file.originalname)}`);
+    const ext = path.extname(file.originalname || "").toLowerCase();
+    const safeExt = [".jpeg", ".jpg", ".png", ".webp"].includes(ext) ? ext : "";
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `${unique}${safeExt}`);
   },
 });
 
-//File filter - jpeg, jpg, png, webp
 const fileFilter = (req, file, cb) => {
-  const filetypes = /jpeg|jpg|png|webp/;
-  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = filetypes.test(file.mimetype);
+  const allowedTypes = /jpeg|jpg|png|webp/;
+  const extname = allowedTypes.test(
+    path.extname(file.originalname).toLocaleLowerCase()
+  );
+  const mimeType = allowedTypes.test(file.mimetype);
 
-  if (extname && mimetype) {
-    return cb(null, true);
+  if (extname && mimeType) {
+    cb(null, true);
   } else {
-    cb("Error: Images Only! - jpeg, jpg, png, webp" + file.originalname);
+    cb(new Error("Only image files are allowed (jpeg,jpg,png,webp)"));
   }
 };
 
 export const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 1024 * 1024 * 5 },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
 });
